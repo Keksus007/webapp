@@ -167,17 +167,18 @@
         
         .map-btn {
             position: absolute;
-            right: 12px;
+            right: 8px;
             top: 50%;
             transform: translateY(-50%);
             background: #667eea;
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 20px;
+            padding: 10px 12px;
+            font-size: 18px;
             cursor: pointer;
             transition: all 0.3s;
+            z-index: 10;
         }
         
         .map-btn:active {
@@ -366,7 +367,7 @@
                         <span>Место</span>
                     </div>
                     <div class="location-input-wrapper">
-                        <input type="text" id="location" placeholder="Flavium спортивный зал" required style="padding-right: 60px;">
+                        <input type="text" id="location" placeholder="Flavium спортивный зал" required style="padding-right: 50px;">
                         <button type="button" class="map-btn" id="mapBtn">📍</button>
                     </div>
                     <div class="hint">💡 Или выберите на карте</div>
@@ -461,6 +462,9 @@
                 this.classList.add('selected');
                 selectedSport = this.dataset.sport;
                 document.getElementById('sportType').value = selectedSport;
+                
+                // Обновляем кнопку!
+                updateMainButton();
                 
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred('light');
