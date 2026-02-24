@@ -443,7 +443,7 @@
                 </div>
             </div>
             
-            <button type="submit" class="submit-btn">✨ Создать мероприятие</button>
+            <!-- Кнопка убрана - используется Telegram MainButton -->
         </form>
     </div>
     
@@ -468,36 +468,36 @@
             });
         });
         
-        // Корты по видам спорта
+        // Корты по видам спорта (проверенные адреса)
         const allCourts = {
             padel: [
-                {name: 'Padel Smash', address: 'Padel Smash, Белград'},
-                {name: 'Belgrade Padel Club', address: 'Belgrade Padel Club'},
-                {name: 'Ada Padel', address: 'Ada Ciganlija Padel'},
-                {name: 'Novi Beograd Padel', address: 'Novi Beograd Padel'},
-                {name: 'Flavium Padel', address: 'Flavium спортивный зал'},
-                {name: 'Padel Arena', address: 'Padel Arena Belgrade'},
-                {name: 'Center Court Padel', address: 'Center Court Padel Club'}
+                {name: 'Padel Smash', address: 'Padel Smash, Bulevar Zorana Đinđića, Beograd'},
+                {name: 'Belgrade Padel Club', address: 'Belgrade Padel Club, Novi Beograd'},
+                {name: 'Ada Padel', address: 'Ada Ciganlija, Padel teren'},
+                {name: 'Flavium Sport', address: 'Flavium Sport, Beograd'},
+                {name: 'Padel Arena', address: 'Padel Arena, Zemun'},
+                {name: 'Sportski Centar 11. April', address: 'SC 11. April, Novi Beograd'},
+                {name: 'Master Padel Club', address: 'Master Padel, Beograd'}
             ],
             volleyball: [
-                {name: 'Volleyball Arena', address: 'Спортски центар Нови Београд'},
-                {name: 'Ada Volleyball', address: 'Ada Ciganlija Volleyball'},
-                {name: 'Sports Hall Pionir', address: 'Hala Pionir'},
-                {name: 'ŽOK Vizura', address: 'ЖОК Визура'},
-                {name: 'Beach Volleyball Ada', address: 'Ada Ciganlija Beach Volleyball'}
+                {name: 'SC Novi Beograd', address: 'Sportski centar Novi Beograd'},
+                {name: 'Ada Volleyball', address: 'Ada Ciganlija, Odbojka'},
+                {name: 'Hala Pionir', address: 'Hala Pionir, Beograd'},
+                {name: 'SC 25. Maj', address: 'Sportski centar 25. Maj'},
+                {name: 'Beach Volleyball Ada', address: 'Ada Ciganlija, Beach Volleyball'}
             ],
             football: [
-                {name: 'Football Arena Belgrade', address: 'Football Arena Belgrade'},
-                {name: 'Ada Football Fields', address: 'Ada Ciganlija Football'},
-                {name: 'SportDepot', address: 'SportDepot Белград'},
-                {name: 'Partizan Training', address: 'Partizan Training Ground'},
-                {name: 'Mini Football 11', address: 'Mini Football 11 Beograd'}
+                {name: 'Arena Belgrade', address: 'Arena Sport, Novi Beograd'},
+                {name: 'Ada Football', address: 'Ada Ciganlija, Fudbalski tereni'},
+                {name: 'SportDepot', address: 'SportDepot, Beograd'},
+                {name: 'SC 11. April Football', address: 'SC 11. April, Fudbal'},
+                {name: 'Mini Football Merkur', address: 'Mini Football Merkur, Beograd'}
             ],
             basketball: [
-                {name: 'Basketball Hall Pionir', address: 'Hala Pionir Basketball'},
-                {name: 'Ada Basketball', address: 'Ada Ciganlija Basketball Courts'},
-                {name: 'Avala Basketball', address: 'Avala Basketball Courts'},
-                {name: 'Partizan Arena', address: 'Partizan Basketball Arena'}
+                {name: 'Hala Pionir Basketball', address: 'Hala Pionir, Košarka'},
+                {name: 'Ada Basketball', address: 'Ada Ciganlija, Košarkaški tereni'},
+                {name: 'SC Novi Beograd', address: 'SC Novi Beograd, Košarka'},
+                {name: 'Avala Basketball', address: 'Avala, Košarkaški tereni'}
             ]
         };
         
@@ -631,7 +631,59 @@
             this.value = formatTime(this);
         });
         
-        // Отправка формы
+        // Отправка формы через Telegram MainButton
+        tg.MainButton.setText("✨ Создать мероприятие");
+        tg.MainButton.show();
+        
+        // Обновляем кнопку когда форма готова
+        function updateMainButton() {
+            if (selectedSport && 
+                document.getElementById('title').value && 
+                document.getElementById('location').value &&
+                document.getElementById('timeStart').value &&
+                document.getElementById('timeEnd').value) {
+                tg.MainButton.enable();
+            } else {
+                tg.MainButton.disable();
+            }
+        }
+        
+        // Слушаем изменения в форме
+        document.getElementById('title').addEventListener('input', updateMainButton);
+        document.getElementById('location').addEventListener('input', updateMainButton);
+        document.getElementById('timeStart').addEventListener('input', updateMainButton);
+        document.getElementById('timeEnd').addEventListener('input', updateMainButton);
+        
+        // Отправка по клику на MainButton
+        tg.MainButton.onClick(function() {
+            if (!selectedSport) {
+                tg.showAlert('Выберите вид спорта!');
+                return;
+            }
+            
+            const timeStart = formatTime(document.getElementById('timeStart'));
+            const timeEnd = formatTime(document.getElementById('timeEnd'));
+            
+            const formData = {
+                sport_type: selectedSport,
+                title: document.getElementById('title').value,
+                date: document.getElementById('date').value,
+                time: timeStart + '-' + timeEnd,
+                location: document.getElementById('location').value,
+                max_participants: participantCount,
+                price: parseInt(document.getElementById('price').value) || 0,
+                currency: document.getElementById('currency').value
+            };
+            
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+            
+            // Отправляем данные
+            tg.sendData(JSON.stringify(formData));
+        });
+        
+        // Fallback: обычная форма для кнопки в чате
         document.getElementById('eventForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
