@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Создание мероприятия</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 50%, #4ECDC4 100%);
+            padding: 30px 20px;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 10px 40px rgba(255, 107, 107, 0.3);
+            text-align: center;
+            margin: -20px -20px 30px -20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        
+        .header p {
+            color: rgba(255,255,255,0.95);
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            animation: slideUp 0.4s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title .emoji {
+            font-size: 24px;
+        }
+        
+        .sport-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .sport-btn {
+            position: relative;
+            padding: 20px;
+            border: 3px solid #e2e8f0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        
+        .sport-btn:active {
+            transform: scale(0.96);
+        }
+        
+        .sport-btn.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .sport-btn.selected .sport-emoji,
+        .sport-btn.selected .sport-name {
+            color: white;
+        }
+        
+        .sport-emoji {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        
+        .sport-name {
+            font-weight: 700;
+            font-size: 15px;
+            color: #2d3748;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 16px;
+        }
+        
+        .input-label .emoji {
+            font-size: 20px;
+        }
+        
+        input[type="text"],
+        input[type="date"],
+        input[type="time"] {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            background: #f7fafc;
+            color: #2d3748;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        input::placeholder {
+            color: #a0aec0;
+        }
+        
+        .hint {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #718096;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .participant-control {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .participant-btn {
+            width: 56px;
+            height: 56px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            user-select: none;
+        }
+        
+        .participant-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .participant-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .participant-display {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .participant-value {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        
+        .participant-label {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 50%, #4ECDC4 100%);
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s;
+            animation: gradientShift 3s ease infinite;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .submit-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .date-time-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        @media (max-width: 480px) {
+            .date-time-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>📝 Создание мероприятия</h1>
+                <p>Заполните форму ниже</p>
+            </div>
+        </div>
+        
+        <form id="eventForm">
+            <!-- Вид спорта -->
+            <div class="card">
+                <div class="section-title">
+                    <span class="emoji">🎯</span>
+                    <span>Выберите вид спорта</span>
+                </div>
+                <div class="sport-grid">
+                    <div class="sport-btn" data-sport="padel">
+                        <span class="sport-emoji">🎾</span>
+                        <div class="sport-name">Padel</div>
+                    </div>
+                    <div class="sport-btn" data-sport="volleyball">
+                        <span class="sport-emoji">🏐</span>
+                        <div class="sport-name">Volleyball</div>
+                    </div>
+                    <div class="sport-btn" data-sport="football">
+                        <span class="sport-emoji">⚽</span>
+                        <div class="sport-name">Football</div>
+                    </div>
+                    <div class="sport-btn" data-sport="basketball">
+                        <span class="sport-emoji">🏀</span>
+                        <div class="sport-name">Basketball</div>
+                    </div>
+                </div>
+                <input type="hidden" id="sportType" required>
+            </div>
+            
+            <!-- Основная информация -->
+            <div class="card">
+                <div class="section-title">
+                    <span class="emoji">📋</span>
+                    <span>Основная информация</span>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span class="emoji">📝</span>
+                        <span>Название</span>
+                    </div>
+                    <input type="text" id="title" placeholder="Воскресный падел" required>
+                    <div class="hint">💡 Придумайте яркое название</div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span class="emoji">📍</span>
+                        <span>Место</span>
+                    </div>
+                    <input type="text" id="location" placeholder="Flavium спортивный зал" required>
+                    <div class="hint">💡 Укажите конкретный адрес</div>
+                </div>
+            </div>
+            
+            <!-- Дата и время -->
+            <div class="card">
+                <div class="section-title">
+                    <span class="emoji">📅</span>
+                    <span>Дата и время</span>
+                </div>
+                
+                <div class="date-time-row">
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="emoji">📅</span>
+                            <span>Дата</span>
+                        </div>
+                        <input type="date" id="date" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="emoji">⏰</span>
+                            <span>Время</span>
+                        </div>
+                        <input type="text" id="time" placeholder="19:00-21:00" required>
+                    </div>
+                </div>
+                <div class="hint">💡 Формат времени: 19:00-21:00</div>
+            </div>
+            
+            <!-- Участники -->
+            <div class="card">
+                <div class="section-title">
+                    <span class="emoji">👥</span>
+                    <span>Количество участников</span>
+                </div>
+                
+                <div class="participant-control">
+                    <button type="button" class="participant-btn" id="decreaseBtn">−</button>
+                    <div class="participant-display">
+                        <div class="participant-value" id="participantValue">4</div>
+                        <div class="participant-label">участников</div>
+                    </div>
+                    <button type="button" class="participant-btn" id="increaseBtn">+</button>
+                </div>
+                <input type="hidden" id="maxParticipants" value="4">
+            </div>
+            
+            <button type="submit" class="submit-btn">✨ Создать мероприятие</button>
+        </form>
+    </div>
+    
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.MainButton.hide();
+        
+        // Применяем тему Telegram
+        document.body.style.background = tg.themeParams.bg_color || 'linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%)';
+        
+        let selectedSport = null;
+        let participantCount = 4;
+        
+        // Выбор вида спорта
+        document.querySelectorAll('.sport-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.sport-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedSport = this.dataset.sport;
+                document.getElementById('sportType').value = selectedSport;
+                
+                // Haptic feedback
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('light');
+                }
+            });
+        });
+        
+        // Управление количеством участников
+        document.getElementById('decreaseBtn').addEventListener('click', function() {
+            if (participantCount > 2) {
+                participantCount--;
+                updateParticipants();
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('light');
+                }
+            }
+        });
+        
+        document.getElementById('increaseBtn').addEventListener('click', function() {
+            if (participantCount < 50) {
+                participantCount++;
+                updateParticipants();
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('light');
+                }
+            }
+        });
+        
+        function updateParticipants() {
+            document.getElementById('participantValue').textContent = participantCount;
+            document.getElementById('maxParticipants').value = participantCount;
+            
+            // Обновляем состояние кнопок
+            document.getElementById('decreaseBtn').disabled = participantCount <= 2;
+            document.getElementById('increaseBtn').disabled = participantCount >= 50;
+        }
+        
+        // Отправка формы
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!selectedSport) {
+                tg.showAlert('Выберите вид спорта!');
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+                return;
+            }
+            
+            const formData = {
+                sport_type: selectedSport,
+                title: document.getElementById('title').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                location: document.getElementById('location').value,
+                max_participants: participantCount
+            };
+            
+            // Haptic feedback успеха
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+            
+            // Отправка данных боту
+            tg.sendData(JSON.stringify(formData));
+        });
+        
+        // Установка сегодняшней даты по умолчанию
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+        
+        // Автоматически выбираем Padel
+        document.querySelector('[data-sport="padel"]').click();
+        
+        // Инициализация состояния кнопок
+        updateParticipants();
+    </script>
+</body>
+</html>
