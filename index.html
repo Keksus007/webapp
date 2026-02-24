@@ -484,13 +484,25 @@
             }
         });
         
-        // Ввод вручную
+        // Ввод вручную - ПУСТОЕ ПОЛЕ РАЗРЕШЕНО
         participantInput.addEventListener('input', function() {
-            let value = parseInt(this.value) || 2;
+            if (this.value === '') {
+                participantCount = 0;
+                return;
+            }
+            let value = parseInt(this.value) || 0;
             if (value < 2) value = 2;
             if (value > 50) value = 50;
             participantCount = value;
             this.value = value;
+            updateParticipantButtons();
+        });
+        
+        participantInput.addEventListener('blur', function() {
+            if (this.value === '' || participantCount < 2) {
+                participantCount = 2;
+                this.value = 2;
+            }
             updateParticipantButtons();
         });
         
@@ -552,6 +564,7 @@
                 tg.HapticFeedback.notificationOccurred('success');
             }
             
+            // Отправляем данные
             tg.sendData(JSON.stringify(formData));
         });
         
