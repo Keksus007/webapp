@@ -390,7 +390,7 @@
                         <span>Цена</span>
                     </div>
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
-                        <input type="number" id="price" placeholder="2000" min="0" value="0">
+                        <input type="number" id="price" placeholder="2000" min="0">
                         <select id="currency" style="padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; font-weight: 500; background: #f7fafc; color: #2d3748;">
                             <option value="RSD">RSD</option>
                             <option value="EUR">EUR</option>
@@ -443,32 +443,60 @@
             });
         });
         
+        // Корты по видам спорта
+        const allCourts = {
+            padel: [
+                {name: 'Padel Smash', address: 'Padel Smash, Белград'},
+                {name: 'Belgrade Padel Club', address: 'Belgrade Padel Club'},
+                {name: 'Ada Padel', address: 'Ada Ciganlija Padel'},
+                {name: 'Novi Beograd Padel', address: 'Novi Beograd Padel'},
+                {name: 'Flavium Padel', address: 'Flavium спортивный зал'},
+                {name: 'Padel Arena', address: 'Padel Arena Belgrade'},
+                {name: 'Center Court Padel', address: 'Center Court Padel Club'}
+            ],
+            volleyball: [
+                {name: 'Volleyball Arena', address: 'Спортски центар Нови Београд'},
+                {name: 'Ada Volleyball', address: 'Ada Ciganlija Volleyball'},
+                {name: 'Sports Hall Pionir', address: 'Hala Pionir'},
+                {name: 'ŽOK Vizura', address: 'ЖОК Визура'},
+                {name: 'Beach Volleyball Ada', address: 'Ada Ciganlija Beach Volleyball'}
+            ],
+            football: [
+                {name: 'Football Arena Belgrade', address: 'Football Arena Belgrade'},
+                {name: 'Ada Football Fields', address: 'Ada Ciganlija Football'},
+                {name: 'SportDepot', address: 'SportDepot Белград'},
+                {name: 'Partizan Training', address: 'Partizan Training Ground'},
+                {name: 'Mini Football 11', address: 'Mini Football 11 Beograd'}
+            ],
+            basketball: [
+                {name: 'Basketball Hall Pionir', address: 'Hala Pionir Basketball'},
+                {name: 'Ada Basketball', address: 'Ada Ciganlija Basketball Courts'},
+                {name: 'Avala Basketball', address: 'Avala Basketball Courts'},
+                {name: 'Partizan Arena', address: 'Partizan Basketball Arena'}
+            ]
+        };
+        
         // Кнопка карты
         document.getElementById('mapBtn').addEventListener('click', function() {
             if (tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('medium');
             }
             
-            // Открываем карту с выбором корта
-            showCourtMap();
+            // Получаем выбранный спорт
+            const sportType = selectedSport || 'padel';
+            const courts = allCourts[sportType] || allCourts.padel;
+            
+            showCourtMap(courts);
         });
         
-        function showCourtMap() {
-            // Падел корты в Белграде
-            const courts = [
-                {name: 'Padel Smash', lat: 44.7866, lng: 20.4489, address: 'Padel Smash, Белград'},
-                {name: 'Belgrade Padel Club', lat: 44.8125, lng: 20.4612, address: 'Belgrade Padel Club'},
-                {name: 'Ada Padel', lat: 44.8033, lng: 20.4275, address: 'Ada Ciganlija Padel'},
-                {name: 'Novi Beograd Padel', lat: 44.8167, lng: 20.4014, address: 'Novi Beograd Padel'}
-            ];
-            
+        function showCourtMap(courts) {
             // Создаём HTML для выбора
-            let html = '<div style="padding: 20px; max-height: 400px; overflow-y: auto;">';
-            html += '<h3 style="margin: 0 0 20px 0;">📍 Выберите корт:</h3>';
+            let html = '<div style="padding: 20px; max-height: 500px; overflow-y: auto;">';
+            html += '<h3 style="margin: 0 0 20px 0; text-align: center;">📍 Выберите площадку:</h3>';
             
             courts.forEach((court, i) => {
-                html += `<div style="padding: 15px; margin-bottom: 10px; background: #f7fafc; border-radius: 12px; cursor: pointer;" onclick="selectCourt('${court.address}')">`;
-                html += `<div style="font-weight: 700; font-size: 16px; margin-bottom: 5px;">${court.name}</div>`;
+                html += `<div style="padding: 15px; margin-bottom: 10px; background: #f7fafc; border-radius: 12px; cursor: pointer; border: 2px solid #e2e8f0; transition: all 0.2s;" onclick="selectCourt('${court.address}')" onmouseover="this.style.borderColor='#667eea'" onmouseout="this.style.borderColor='#e2e8f0'">`;
+                html += `<div style="font-weight: 700; font-size: 16px; margin-bottom: 5px; color: #2d3748;">${court.name}</div>`;
                 html += `<div style="color: #718096; font-size: 14px;">${court.address}</div>`;
                 html += `</div>`;
             });
@@ -483,7 +511,7 @@
             // Кнопка закрыть
             const closeBtn = document.createElement('button');
             closeBtn.textContent = '✕';
-            closeBtn.style.cssText = 'position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border: none; background: #e2e8f0; border-radius: 50%; font-size: 20px; cursor: pointer;';
+            closeBtn.style.cssText = 'position: fixed; top: 15px; right: 15px; width: 45px; height: 45px; border: none; background: #667eea; border-radius: 50%; font-size: 24px; cursor: pointer; color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.4); z-index: 1001;';
             closeBtn.onclick = () => document.body.removeChild(popup);
             popup.appendChild(closeBtn);
             
