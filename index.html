@@ -377,6 +377,30 @@
                 </div>
             </div>
             
+            <!-- Цена -->
+            <div class="card">
+                <div class="section-title">
+                    <span>💰</span>
+                    <span>Стоимость</span>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>💵</span>
+                        <span>Цена</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+                        <input type="number" id="price" placeholder="2000" min="0" value="0">
+                        <select id="currency" style="padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; font-weight: 500; background: #f7fafc; color: #2d3748;">
+                            <option value="RSD">RSD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="USD">USD</option>
+                        </select>
+                    </div>
+                    <div class="hint">💡 Укажите цену за участие</div>
+                </div>
+            </div>
+            
             <!-- Участники -->
             <div class="card">
                 <div class="section-title">
@@ -519,7 +543,9 @@
                 date: document.getElementById('date').value,
                 time: timeStart + '-' + timeEnd,
                 location: document.getElementById('location').value,
-                max_participants: participantCount
+                max_participants: participantCount,
+                price: parseInt(document.getElementById('price').value) || 0,
+                currency: document.getElementById('currency').value
             };
             
             if (tg.HapticFeedback) {
